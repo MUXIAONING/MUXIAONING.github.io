@@ -557,7 +557,7 @@
 </li>
 </ul>
 <p><strong>Elasticsearch 核心知识图谱</strong></p>
-<p><a href="https://ask.qcloudimg.com/http-save/yehe-1088682/q552cxsfre.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img src="https://ask.qcloudimg.com/http-save/yehe-1088682/q552cxsfre.jpeg?imageView2/2/w/1620" alt="img"></a></p>
+<p><a href="https://ask.qcloudimg.com/http-save/yehe-1088682/q552cxsfre.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img data-src="https://ask.qcloudimg.com/http-save/yehe-1088682/q552cxsfre.jpeg?imageView2/2/w/1620" alt="img"></a></p>
 <h4 id="es-是如何实现分布式"><a href="#es-是如何实现分布式" class="headerlink" title="es 是如何实现分布式"></a>es 是如何实现分布式</h4><p>ES实际上就是利用分片来实现分布式。分片是数据的容器，文档保存在分片内，分片又被分配到集群内的各个节点里。 当你的集群规模扩大或者缩小时， ES会自动的在各节点中迁移分片，使得数据仍然均匀分布在集群里。</p>
 <p>在索引建立的时候就已经确定了主分片数，但是副本分片数可以随时修改。默认情况下，一个索引会有5个主分片，而其副本可以有任意数量。</p>
 <p>主分片和副本分片的状态决定了集群的健康状态。每一个节点上都只会保存主分片或者其对应的一个副本分片，相同的副本分片不会存在于同一个节点中。如果集群中只有一个节点，则副本分片将不会被分配，此时集群健康状态为yellow，存在丢失数据的风险。</p>
@@ -617,7 +617,7 @@
 <p>我们知道，每个文档都有一个ID，如果插入的时候没有指定的话，Elasticsearch会自动生成一个，因此ID字段就不多说了.</p>
 <h4 id="es-在数据量很大的情况下（数十亿级别）如何提高查询效率"><a href="#es-在数据量很大的情况下（数十亿级别）如何提高查询效率" class="headerlink" title="es 在数据量很大的情况下（数十亿级别）如何提高查询效率"></a>es 在数据量很大的情况下（数十亿级别）如何提高查询效率</h4><p><strong>性能优化的杀手锏——filesystem cache</strong></p>
 <p>你往 es 里写的数据，实际上都写到磁盘文件里去了，<strong>查询的时候</strong>，操作系统会将磁盘文件里的数据自动缓存到 <code>filesystem cache</code> 里面去。</p>
-<p><a href="https://github.com/doocs/advanced-java/blob/master/images/es-search-process.png" target="_blank" rel="noopener"><img src="https://github.com/doocs/advanced-java/raw/master/images/es-search-process.png" alt="es-search-process"></a></p>
+<p><a href="https://github.com/doocs/advanced-java/blob/master/images/es-search-process.png" target="_blank" rel="noopener"><img data-src="https://github.com/doocs/advanced-java/raw/master/images/es-search-process.png" alt="es-search-process"></a></p>
 <p>es 的搜索引擎严重依赖于底层的 <code>filesystem cache</code>，你如果给 <code>filesystem cache</code> 更多的内存，尽量让内存可以容纳所有的 <code>idx segment file</code>索引数据文件，那么你搜索的时候就基本都是走内存的，性能会非常高。</p>
 <p>性能差距究竟可以有多大？我们之前很多的测试和压测，如果走磁盘一般肯定上秒，搜索性能绝对是秒级别的，1秒、5秒、10秒。但如果是走 <code>filesystem cache</code>，是走纯内存的，那么一般来说性能比走磁盘要高一个数量级，基本上就是毫秒级的，从几毫秒到几百毫秒不等。</p>
 <p>这里有个真实的案例。某个公司 es 节点有 3 台机器，每台机器看起来内存很多，64G，总内存就是 <code>64 * 3 = 192G</code>。每台机器给 es jvm heap 是 <code>32G</code>，那么剩下来留给 <code>filesystem cache</code> 的就是每台机器才 <code>32G</code>，总共集群里给 <code>filesystem cache</code> 的就是 <code>32 * 3 = 96G</code> 内存。而此时，整个磁盘上索引数据文件，在 3 台机器上一共占用了 <code>1T</code> 的磁盘容量，es 数据量是 <code>1T</code>，那么每台机器的数据量是 <code>300G</code>。这样性能好吗？ <code>filesystem cache</code> 的内存才 100G，十分之一的数据可以放内存，其他的都在磁盘，然后你执行搜索操作，大部分操作都是走磁盘，性能肯定差。</p>
@@ -784,7 +784,7 @@
 <li>读写分离</li>
 <li>ElasticSearch</li>
 </ul>
-<p><a href="https://github.com/doocs/advanced-java/blob/master/images/high-concurrency-system-design.png" target="_blank" rel="noopener"><img src="https://github.com/doocs/advanced-java/raw/master/images/high-concurrency-system-design.png" alt="high-concurrency-system-design"></a></p>
+<p><a href="https://github.com/doocs/advanced-java/blob/master/images/high-concurrency-system-design.png" target="_blank" rel="noopener"><img data-src="https://github.com/doocs/advanced-java/raw/master/images/high-concurrency-system-design.png" alt="high-concurrency-system-design"></a></p>
 <h5 id="系统拆分"><a href="#系统拆分" class="headerlink" title="系统拆分"></a>系统拆分</h5><p>将一个系统拆分为多个子系统，用 dubbo 来搞。然后每个系统连一个数据库，这样本来就一个库，现在多个数据库，不也可以扛高并发么。</p>
 <h5 id="缓存-1"><a href="#缓存-1" class="headerlink" title="缓存"></a>缓存</h5><p>缓存，必须得用缓存。大部分的高并发场景，都是<strong>读多写少</strong>，那你完全可以在数据库和缓存里都写一份，然后读的时候大量走缓存不就得了。毕竟人家 redis 轻轻松松单机几万的并发。所以你可以考虑考虑你的项目里，那些承载主要请求的<strong>读场景，怎么用缓存来抗高并发</strong>。</p>
 <h5 id="MQ"><a href="#MQ" class="headerlink" title="MQ"></a>MQ</h5><p>MQ，必须得用 MQ。可能你还是会出现高并发写的场景，比如说一个业务操作里要频繁搞数据库几十次，增删改增删改，疯了。那高并发绝对搞挂你的系统，你要是用 redis 来承载写那肯定不行，人家是缓存，数据随时就被 LRU 了，数据格式还无比简单，没有事务支持。所以该用 mysql 还得用 mysql 啊。那你咋办？用 MQ 吧，大量的写请求灌入 MQ 里，排队慢慢玩儿，<strong>后边系统消费后慢慢写</strong>，控制在 mysql 承载范围之内。所以你得考虑考虑你的项目里，那些承载复杂写业务逻辑的场景里，如何用 MQ 来异步写，提升并发性。MQ 单机抗几万并发也是 ok 的，这个之前还特意说过。</p>
