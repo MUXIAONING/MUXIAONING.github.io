@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|楷体:300,300italic,400,400italic,700,700italic|consola:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="名字 类型 作用的对象 作用    DDL 英文全称 (Data Definition Language) 数据定义语言 库、表、列 创建、删除、修改、库或表结构，对数据库或表的结构操作   DML 英文全称(Data Manipulation Language) 数据操作语言 数据库记录（数据） 增、删、改，对表记录进行更新(增、删、改)   DQL 英文全称(Data Query Lan">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql中DML DDL DCL DQL">
+<meta property="og:url" content="http://yoursite.com/2019/07/25/mysql%E4%B8%ADDML-DDL-DCL-DQL/index.html">
+<meta property="og:site_name" content="J.Nemo">
+<meta property="og:description" content="名字 类型 作用的对象 作用    DDL 英文全称 (Data Definition Language) 数据定义语言 库、表、列 创建、删除、修改、库或表结构，对数据库或表的结构操作   DML 英文全称(Data Manipulation Language) 数据操作语言 数据库记录（数据） 增、删、改，对表记录进行更新(增、删、改)   DQL 英文全称(Data Query Lan">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-07-25T00:43:33.000Z">
+<meta property="article:modified_time" content="2020-06-30T00:45:15.325Z">
+<meta property="article:author" content="J.Nemo">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="加密">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2019/07/25/mysql%E4%B8%ADDML-DDL-DCL-DQL/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mysql中DML DDL DCL DQL | J.Nemo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">J.Nemo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Stay Hungry, Stay Foolish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/25/mysql%E4%B8%ADDML-DDL-DCL-DQL/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://drscdn.500px.org/photo/295255277/q%3D80_h%3D450/v2?user_id=39303725&webp=true&sig=c7760b111c6b95f1efb246c5ad9ebdbf09342ecc18dda4a9f928b968f699e2a1">
+      <meta itemprop="name" content="J.Nemo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="J.Nemo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql中DML DDL DCL DQL
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-07-25 08:43:33" itemprop="dateCreated datePublished" datetime="2019-07-25T08:43:33+08:00">2019-07-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-30 08:45:15" itemprop="dateModified" datetime="2020-06-30T08:45:15+08:00">2020-06-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <table>
+<thead>
+<tr>
+<th align="left">名字</th>
+<th align="left">类型</th>
+<th align="left">作用的对象</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">DDL 英文全称 (Data Definition Language)</td>
+<td align="left">数据定义语言</td>
+<td align="left">库、表、列</td>
+<td align="left">创建、删除、修改、库或表结构，对数据库或表的结构操作</td>
+</tr>
+<tr>
+<td align="left">DML 英文全称(Data Manipulation Language)</td>
+<td align="left">数据操作语言</td>
+<td align="left">数据库记录（数据）</td>
+<td align="left">增、删、改，对表记录进行更新(增、删、改)</td>
+</tr>
+<tr>
+<td align="left">DQL 英文全称(Data Query Language)</td>
+<td align="left">数据查询语言</td>
+<td align="left">数据库记录（数据）</td>
+<td align="left">查、用来查询数据，对表记录的查询</td>
+</tr>
+<tr>
+<td align="left">DCL 英文全称(Data Control Language)</td>
+<td align="left">数据控制语言</td>
+<td align="left">数据库用户</td>
+<td align="left">用来定义访问的权限和安全级别，对用户的创建，及授权</td>
+</tr>
+</tbody></table>
+<a id="more"></a>
+
+<h2 id="DDL"><a href="#DDL" class="headerlink" title="DDL"></a>DDL</h2><p>简单来说，就是对数据库内部的对象进行创建、删除、修改的操作语言。<strong>它和DML 语言的最大区别是DML 只是对表内部数据的操作，而不涉及到表的定义、结构的修改，更不会涉及到其他对象</strong>。DDL 语句更多的被数据库管理员（DBA）所使用，DDL主要负责数据库的创/改/查/删以及表格的创/改/查/删，一般的开发人员很少使用。</p>
+<p><strong>1.创建数据库:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create database [数据库名] character set [字符编码];</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.查看数据库:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show databases;</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.查看数据库创建明细:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show create database [数据库名字];</span><br></pre></td></tr></table></figure>
+
+<p><strong>4.修改数据库编码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">alter database [数据库名] character set [字符编码];</span><br></pre></td></tr></table></figure>
+
+<p><strong>5.删除数据库:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">drop database [数据库名];</span><br></pre></td></tr></table></figure>
+
+<p><strong>6.使用数据库:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">use [数据库名];</span><br></pre></td></tr></table></figure>
+
+<p><strong>7.创建表格:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create table employee(id int,name varchar(20),sex char(2),birthday date,job varchar(50),salary double(7,2));</span><br></pre></td></tr></table></figure>
+
+<p><strong>8.查看表的结构:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desc [表名];</span><br></pre></td></tr></table></figure>
+
+<p><strong>9.在表中插入列:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">alter table employee add address varchar(100);</span><br></pre></td></tr></table></figure>
+
+<p><strong>10.修改列字符的属性:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE employee MODIFY job VARCHAR(20);</span><br></pre></td></tr></table></figure>
+
+<p>注:即将原来varchar(50)改为20;</p>
+<p><strong>11.删除某列:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE employee DROP address;</span><br></pre></td></tr></table></figure>
+
+<p><strong>12.更改表名:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RENAME TABLE employee to user;</span><br></pre></td></tr></table></figure>
+
+<p><strong>13.查看表的创建细节:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW CREATE TABLE user;</span><br></pre></td></tr></table></figure>
+
+<p><strong>14.修改字段名:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE user CHANGE name username VARCHAR(10);</span><br></pre></td></tr></table></figure>
+
+<p><strong>15.删除表:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLE user;</span><br></pre></td></tr></table></figure>
+
+<h2 id="DML"><a href="#DML" class="headerlink" title="DML"></a>DML</h2><p>数据操纵语言（Data Manipulation Language, DML）是SQL语言中，负责对数据库对象运行数据访问工作的指令集，以<strong>INSERT、UPDATE、DELETE</strong>三种指令为核心，分别代表插入、更新与删除，是开发以数据为中心的应用程序必定会使用到的指令。<strong>DML是对数据库表中的数据增删改的操作.</strong></p>
+<p><strong>1.插入数据:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">insert into emp(id,name,sex,birthday,salary) values (1,&#39;dupudupu&#39;,&#39;男&#39;,&#39;2011-09-08&#39;,1000);</span><br></pre></td></tr></table></figure>
+
+<p><strong>也可以这样写,省略前面括号里面的内容</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">insert into emp values (2,&#39;Paul&#39;,&#39;男&#39;,&#39;2018-09-22&#39;,800);</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.批量插入:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">insert into emp values </span><br><span class="line">(3,&#39;Lili&#39;,&#39;女&#39;,&#39;2017-06-25&#39;,3000),</span><br><span class="line">(4,&#39;Hali&#39;,&#39;男&#39;,&#39;2014-09-08&#39;,1000),</span><br><span class="line">(5,&#39;Soso&#39;,&#39;女&#39;,&#39;1997-07-30&#39;,10000),</span><br><span class="line">(6,&#39;Mama&#39;,&#39;女&#39;,&#39;1789-03-25&#39;,8888);</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.修改数据:</strong>当我在Mysql Workbench中使用下面的语句时,出现了错误</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update emp set name&#x3D;&#39;Dupu&#39; where id &#x3D; 1;</span><br></pre></td></tr></table></figure>
+
+<p>首先语句是没有错的,经查询</p>
+<ul>
+<li>错误原因：是在safe mode下,要强制安全点,update只能跟where</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error Code: 1175. You are using safe update mode and you tried to update a table without a WHERE that uses a KEY column To disable safe mode, toggle the option in Preferences -&gt; SQL Editor and reconnect.</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>解决方案 : 执行命令—-&gt;SET SQL_SAFE_UPDATES = 0;</li>
+</ul>
+<p><strong>4.删除数据</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delete from emp where id&#x3D;6;</span><br></pre></td></tr></table></figure>
+
+<h2 id="DCL"><a href="#DCL" class="headerlink" title="DCL"></a>DCL</h2><p>DCL（Data Control Language）是数据库控制语言。是用来设置或更改数据库用户或角色权限的语句，包括（grant,deny,revoke等）语句。在默认状态下，只有sysadmin,dbcreator,db_owner或db_securityadmin等人员才有权力执行DCL。</p>
+<p><strong>1.创建用户</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE USER 用户名@地址 IDENTIFIED BY &#39;密码&#39;;</span><br><span class="line">CREATE USER user1@localhost IDENTIFIED BY ‘123’; </span><br><span class="line">CREATE USER user2@’%’ IDENTIFIED BY ‘123’;</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.用户授权</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GRANT 权限1, … , 权限n ON 数据库.* TO 用户名@IP</span><br><span class="line">GRANT CREATE,ALTER,DROP,INSERT,UPDATE,DELETE,SELECT ON mydb1.* TO user1@localhost;</span><br><span class="line">GRANT ALL ON mydb1.* TO user2@’%’;</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.撤销授权</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">REVOKE权限1, … , 权限n ON 数据库.* FORM 用户名</span><br><span class="line">REVOKE CREATE,ALTER,DROP ON mydb1.* FROM user1@localhost;</span><br></pre></td></tr></table></figure>
+
+<p><strong>4.查看权限</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SHOW GRANTS FOR 用户名</span><br><span class="line">SHOW GRANTS FOR user1@localhost;</span><br></pre></td></tr></table></figure>
+
+<p><strong>5.删除用户</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DROP USER 用户名</span><br><span class="line">DROP USER user1@localhost;</span><br></pre></td></tr></table></figure>
+
+<p><strong>6.修改用户密码</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Use mysql;</span><br><span class="line">UPDATE USER SET PASSWORD&#x3D;PASSWORD(‘密码’) WHERE User&#x3D;’用户名’;</span><br><span class="line">FLUSH PRIVILEGES;</span><br><span class="line">UPDATE USER SET PASSWORD&#x3D;PASSWORD(&#39;1234&#39;) WHERE User&#x3D;&#39;user2&#39;;</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+
+<h2 id="DQL"><a href="#DQL" class="headerlink" title="DQL"></a>DQL</h2><p>数据库执行DQL语句不会对数据进行改变，而是让数据库发送结果集给客户端,查询返回的<strong>结果集是一张虚拟表</strong>。</p>
+<p><strong>1.简单查询</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">select * from 表名;	#查询所有字段</span><br><span class="line">select 列1,列2,... from 表名;	#查询指定字段</span><br><span class="line">select id as 序号, name as 名字, gender as 性别 from students;	#使用 as 给字段起别名</span><br><span class="line">select s.id,s.name,s.gender from students as s;	#可以通过 as 给表起别名</span><br><span class="line">select distinct 列1,... from 表名;   #消除重复行</span><br></pre></td></tr></table></figure>
+
+<p>2.条件查询**</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from 表名 where 条件;</span><br></pre></td></tr></table></figure>
+
+<p>where后面支持多种运算符，进行条件的处理</p>
+<ul>
+<li>比较运算符</li>
+<li>逻辑运算符</li>
+<li>模糊查询</li>
+<li>范围查询</li>
+<li>空判断</li>
+</ul>
+<p>3.排序查询**</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM 表名 ORDER BY 排序字段 ASC|DESC;</span><br></pre></td></tr></table></figure>
+
+<p><strong>4.聚合查询</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT SUM(price) FROM product WHERE category_id &#x3D; &#39;c001&#39;;</span><br><span class="line">SELECT AVG(price) FROM product WHERE category_id &#x3D; &#39;c002&#39;;</span><br><span class="line">SELECT MAX(price),MIN(price) FROM product;</span><br></pre></td></tr></table></figure>
+
+<p>count：统计指定列不为NULL的记录行数；</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sum：计算指定列的数值和，如果指定列类型不是数值类型，那么计算结果为0；</span><br><span class="line"></span><br><span class="line">max：计算指定列的最大值，如果指定列是字符串类型，那么使用字符串排序运算；</span><br><span class="line"></span><br><span class="line">min：计算指定列的最小值，如果指定列是字符串类型，那么使用字符串排序运算；</span><br><span class="line"></span><br><span class="line">avg：计算指定列的平均值，如果指定列类型不是数值类型，那么计算结果为0；</span><br></pre></td></tr></table></figure>
+
+<p><strong>5.分组查询</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">-- 案例1,：查询每个工种的最高工资  【每个】</span><br><span class="line">SELECT MAX(salary),job_id FROM employees GROUP BY job_id;</span><br><span class="line"> </span><br><span class="line">-- 案例2：查询每个位置上的部门个数   【每个】</span><br><span class="line">SELECT COUNT(*),location_id FROM departments GROUP BY location_id;</span><br><span class="line"> </span><br><span class="line">-- 案例3：查询邮箱中包含a字符的，每个部门的平均工资   【每个】</span><br><span class="line">SELECT AVG(salary),department_id FROM employees WHERE email LIKE &#39;%a%&#39;  GROUP BY department_id;</span><br><span class="line"> </span><br><span class="line">-- 案例4：查询有奖金的每个领导手下员工的最高工资    【添加分组前的筛选】</span><br><span class="line">SELECT MAX(salary), manager_id FROM employees WHERE commission_pct IS NOT NULL  GROUP BY manager_id;</span><br><span class="line"> </span><br><span class="line">-- 案例5：查询哪个部门的员工数&gt;2   【添加分组后的筛选】</span><br><span class="line">-- ①查询每个部门的员工个数</span><br><span class="line">SELECT COUNT(*),department_id FROM employees GROUP BY department_id</span><br><span class="line">-- ②根据①的结果进行筛选，查询哪个部门的员工个数&gt;2</span><br><span class="line">SELECT COUNT(*),department_id FROM employees GROUP BY department_id HAVING COUNT(*)&gt;2;</span><br></pre></td></tr></table></figure>
+
+<p><strong>6.外键约束</strong></p>
+<p>1、级联(cascade)方式</p>
+<p>2、置空(set null)方式</p>
+<p>3、禁止(no action / restrict)方式</p>
+<p><strong>7.多表查询</strong></p>
+<p>交叉连接：不适用任何匹配条件。生成笛卡尔积</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from emp,department;</span><br></pre></td></tr></table></figure>
+
+<p>内连接：只连接匹配的行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select emp.id,emp.name,emp.age,emp.sex,department.name from emp inner join department on emp.dep_id&#x3D;department.id;</span><br></pre></td></tr></table></figure>
+
+<p>外链接之左连接：优先显示左表全部记录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select emp.id,emp.name,department.name as depart_name from emp left join department on emp.dep_id&#x3D;department.id;</span><br></pre></td></tr></table></figure>
+
+<p>外链接之右链接：优先显示右表全部记录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select emp.id,emp.name,department.name as depart_name from emp right join department on emp.dep_id&#x3D;department.id;</span><br></pre></td></tr></table></figure>
+
+<p>全外连接：显示左右两个表全部记录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select * from employee left join department on employee.dep_id &#x3D; department.id</span><br><span class="line">union</span><br><span class="line">select * from employee right join department on employee.dep_id &#x3D; department.id</span><br><span class="line">;</span><br></pre></td></tr></table></figure>
+
+<p>案例来自<a href="https://www.cnblogs.com/schut/p/9065402.html" target="_blank" rel="noopener">博客园</a></p>
+<p><strong>8.子查询</strong></p>
+<p><strong>1、带IN关键字的子查询</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#查询平均年龄在25岁以上的部门名</span><br><span class="line">select id,name from department</span><br><span class="line">    where id in </span><br><span class="line">        (select dep_id from employee group by dep_id having avg(age) &gt; 25);</span><br><span class="line"></span><br><span class="line">#查看技术部员工姓名</span><br><span class="line">select name from employee</span><br><span class="line">    where dep_id in </span><br><span class="line">        (select id from department where name&#x3D;&#39;技术&#39;);</span><br><span class="line"></span><br><span class="line">#查看不足1人的部门名</span><br><span class="line">select name from department</span><br><span class="line">    where id in </span><br><span class="line">        (select dep_id from employee group by dep_id having count(id) &lt;&#x3D;1);</span><br></pre></td></tr></table></figure>
+
+<p>　<strong>2、带比较运算符的子查询</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#比较运算符：&#x3D;、!&#x3D;、&gt;、&gt;&#x3D;、&lt;、&lt;&#x3D;、&lt;&gt;</span><br><span class="line">#查询大于所有人平均年龄的员工名与年龄</span><br><span class="line">select name,age from emp where age &gt; (select avg(age) from emp);</span><br><span class="line"></span><br><span class="line">#查询大于部门内平均年龄的员工名、年龄</span><br><span class="line">select t1.name,t1.age from emp t1</span><br><span class="line">inner join </span><br><span class="line">(select dep_id,avg(age) avg_age from emp group by dep_id) t2</span><br><span class="line">on t1.dep_id &#x3D; t2.dep_id</span><br><span class="line">where t1.age &gt; t2.avg_age;</span><br></pre></td></tr></table></figure>
+
+<p><strong>3、带EXISTS关键字的子查询</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">EXISTS关字键字表示存在。在使用EXISTS关键字时，内层查询语句不返回查询的记录。</span><br><span class="line"></span><br><span class="line">而是返回一个真假值。True或False</span><br><span class="line"></span><br><span class="line">当返回True时，外层查询语句将进行查询；当返回值为False时，外层查询语句不进行查询</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/07/25/MYSQL%E5%B8%B8%E7%94%A8%E5%9F%BA%E6%9C%ACSQL%E8%AF%AD%E5%8F%A5%E6%80%BB%E7%BB%93/" rel="prev" title="MYSQL常用基本SQL语句总结">
+      <i class="fa fa-chevron-left"></i> MYSQL常用基本SQL语句总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/07/26/ssm%E4%B8%AD%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/" rel="next" title="ssm中的配置文件">
+      ssm中的配置文件 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MDczMC8yNzIxMg=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DDL"><span class="nav-number">1.</span> <span class="nav-text">DDL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DML"><span class="nav-number">2.</span> <span class="nav-text">DML</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DCL"><span class="nav-number">3.</span> <span class="nav-text">DCL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DQL"><span class="nav-number">4.</span> <span class="nav-text">DQL</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="J.Nemo"
+      src="https://drscdn.500px.org/photo/295255277/q%3D80_h%3D450/v2?user_id=39303725&webp=true&sig=c7760b111c6b95f1efb246c5ad9ebdbf09342ecc18dda4a9f928b968f699e2a1">
+  <p class="site-author-name" itemprop="name">J.Nemo</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/MUXIAONING" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;MUXIAONING" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/6421106372" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;6421106372" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:muxiaoningdewei@gmail.com" title="E-Mail → mailto:muxiaoningdewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://music.163.com/#/user/home?id=446917614" title="网易云 → https:&#x2F;&#x2F;music.163.com&#x2F;#&#x2F;user&#x2F;home?id&#x3D;446917614" rel="noopener" target="_blank"><i class="fa fa-headphones fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+      <link href="https://cdn.jsdelivr.net/npm/aplayer@1.10.0/dist/APlayer.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.0/dist/APlayer.min.js">
+    </script>
+    <div class="aplayer" data-fixed="true" data-id="989500891" data-listfolded="true" data-lrctype="0" data-server="netease" data-type="playlist" id="aplayer">
+    </div>
+    <script src="https://unpkg.com/meting@1.2/dist/Meting.min.js">
+    </script>
+</link>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">J.Nemo</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">274k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:09</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

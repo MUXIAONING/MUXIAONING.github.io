@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|楷体:300,300italic,400,400italic,700,700italic|consola:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="HashMap 概述HashMap 是基于哈希表的 Map 接口的非同步实现。此实现提供所有可选的映射操作，并允许使用 null 值和 null 键。此类不保证映射的顺序，特别是它不保证该顺序恒久不变。 HashMap 的数据结构在 java 编程语言中，最基本的结构就是两种，一个是数组，另外一个是模拟指针（引用），所有的数据结构都可以用这两个基本结构来构造的，HashMap 也不例外。HashM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HashMap的实现原理">
+<meta property="og:url" content="http://yoursite.com/2019/07/20/HashMap%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="J.Nemo">
+<meta property="og:description" content="HashMap 概述HashMap 是基于哈希表的 Map 接口的非同步实现。此实现提供所有可选的映射操作，并允许使用 null 值和 null 键。此类不保证映射的顺序，特别是它不保证该顺序恒久不变。 HashMap 的数据结构在 java 编程语言中，最基本的结构就是两种，一个是数组，另外一个是模拟指针（引用），所有的数据结构都可以用这两个基本结构来构造的，HashMap 也不例外。HashM">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images2015.cnblogs.com/blog/1020081/201609/1020081-20160907220825629-573567526.png">
+<meta property="og:image" content="https://ask.qcloudimg.com/http-save/yehe-1113089/084pakx6og.jpeg?imageView2/2/w/1620">
+<meta property="og:image" content="https://ask.qcloudimg.com/http-save/yehe-1113089/1ig0euvkul.jpeg?imageView2/2/w/1620">
+<meta property="og:image" content="https://ask.qcloudimg.com/http-save/yehe-1113089/scsgfwhwwx.jpeg?imageView2/2/w/1620">
+<meta property="og:image" content="https://ask.qcloudimg.com/http-save/yehe-1113089/sb6c3o02du.jpeg?imageView2/2/w/1620">
+<meta property="og:image" content="https://ask.qcloudimg.com/http-save/yehe-1113089/c0ornk4ywa.jpeg?imageView2/2/w/1620">
+<meta property="og:image" content="https://ask.qcloudimg.com/http-save/yehe-1113089/4kqtf8e1nb.jpeg?imageView2/2/w/1620">
+<meta property="og:image" content="https://ask.qcloudimg.com/http-save/yehe-1113089/vvnq7cd24s.jpeg?imageView2/2/w/1620">
+<meta property="article:published_time" content="2019-07-20T00:53:16.000Z">
+<meta property="article:modified_time" content="2020-06-30T00:57:36.026Z">
+<meta property="article:author" content="J.Nemo">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="加密">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images2015.cnblogs.com/blog/1020081/201609/1020081-20160907220825629-573567526.png">
+
+<link rel="canonical" href="http://yoursite.com/2019/07/20/HashMap%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>HashMap的实现原理 | J.Nemo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">J.Nemo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Stay Hungry, Stay Foolish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/20/HashMap%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://drscdn.500px.org/photo/295255277/q%3D80_h%3D450/v2?user_id=39303725&webp=true&sig=c7760b111c6b95f1efb246c5ad9ebdbf09342ecc18dda4a9f928b968f699e2a1">
+      <meta itemprop="name" content="J.Nemo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="J.Nemo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HashMap的实现原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-07-20 08:53:16" itemprop="dateCreated datePublished" datetime="2019-07-20T08:53:16+08:00">2019-07-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-30 08:57:36" itemprop="dateModified" datetime="2020-06-30T08:57:36+08:00">2020-06-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="HashMap-概述"><a href="#HashMap-概述" class="headerlink" title="HashMap 概述"></a>HashMap 概述</h2><p>HashMap 是基于哈希表的 Map 接口的非同步实现。此实现提供所有可选的映射操作，并允许使用 null 值和 null 键。此类不保证映射的顺序，特别是它不保证该顺序恒久不变。</p>
+<h2 id="HashMap-的数据结构"><a href="#HashMap-的数据结构" class="headerlink" title="HashMap 的数据结构"></a>HashMap 的数据结构</h2><p>在 java 编程语言中，最基本的结构就是两种，一个是数组，另外一个是模拟指针（引用），所有的数据结构都可以用这两个基本结构来构造的，HashMap 也不例外。HashMap实际上是一个“ 链表散列”。</p>
+<p><a href="https://images2015.cnblogs.com/blog/1020081/201609/1020081-20160907220825629-573567526.png" target="_blank" rel="noopener"><img src="https://images2015.cnblogs.com/blog/1020081/201609/1020081-20160907220825629-573567526.png" alt="https://images2015.cnblogs.com/blog/1020081/201609/1020081-20160907220825629-573567526.png"></a></p>
+<p>从上图中可以看出，HashMap 底层就是一个数组结构，数组中的每一项又是一个链表。当新建一个 HashMap 的时候，就会初始化一个数组。</p>
+<a id="more"></a>
+
+<p><strong>源码如下：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line">* The table, resized as necessary. Length MUST Always be a power of two.</span><br><span class="line">*&#x2F;</span><br><span class="line">transient Entry[] table;</span><br><span class="line"></span><br><span class="line">static class Entry&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;</span><br><span class="line">final K key;</span><br><span class="line">V value;</span><br><span class="line">Entry&lt;K,V&gt; next;</span><br><span class="line">final int hash;</span><br><span class="line">   ……</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出，Entry 就是数组中的元素，每个 Map.Entry 其实就是一个 key-value 对，它持有一个指向下一个元素的引用，这就构成了链表。</p>
+<h2 id="HashMap-的存取实现"><a href="#HashMap-的存取实现" class="headerlink" title="HashMap 的存取实现"></a>HashMap 的存取实现</h2><h3 id="put方法"><a href="#put方法" class="headerlink" title="put方法"></a>put方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">public V put(K key, V value) &#123;</span><br><span class="line">        if (table &#x3D;&#x3D; EMPTY_TABLE) &#123;</span><br><span class="line">            inflateTable(threshold);</span><br><span class="line">        &#125;</span><br><span class="line">        if (key &#x3D;&#x3D; null)</span><br><span class="line">            return putForNullKey(value);</span><br><span class="line">        int hash &#x3D; hash(key);</span><br><span class="line">        int i &#x3D; indexFor(hash, table.length);</span><br><span class="line">        for (Entry&lt;K,V&gt; e &#x3D; table[i]; e !&#x3D; null; e &#x3D; e.next) &#123;</span><br><span class="line">            Object k;</span><br><span class="line">            if (e.hash &#x3D;&#x3D; hash &amp;&amp; ((k &#x3D; e.key) &#x3D;&#x3D; key || key.equals(k))) &#123;</span><br><span class="line">                V oldValue &#x3D; e.value;</span><br><span class="line">                e.value &#x3D; value;</span><br><span class="line">                e.recordAccess(this);</span><br><span class="line">                return oldValue;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        modCount++;</span><br><span class="line">        addEntry(hash, key, value, i);</span><br><span class="line">        return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>（1）当table为空时，就调用inflateTable方法扩大table的容量，inflateTable的源码如下，入参是要把table的扩大的容量大小，但由于table的容量只能是2的幂次方（原因稍后会解释），所以为了保证存储需求且最节省空间，需要先计算出大于等于且最接近2的幂次方，然后实例化table，数组容量为新计算出的长度capacity。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private void inflateTable(int toSize) &#123;</span><br><span class="line">        &#x2F;&#x2F; 返回大于等于且最接近2的幂次方的值</span><br><span class="line">        int capacity &#x3D; roundUpToPowerOf2(toSize);</span><br><span class="line">        threshold &#x3D; (int) Math.min(capacity * loadFactor, MAXIMUM_CAPACITY + 1);</span><br><span class="line">        table &#x3D; new Entry[capacity];</span><br><span class="line">        initHashSeedAsNeeded(capacity);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>（2）如下面putForNullKey()方法源码所示，当put的元素key值为null时，会把该元素存储到HashMap的数组下标为0的链表上，先遍历该链表，找到key是null的节点，用新的value替换旧的value；如果没有找到key是null的节点，就直接在数组下标为0的链表上添加该元素（键值对）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">private V putForNullKey(V value) &#123;</span><br><span class="line">        for (Entry&lt;K,V&gt; e &#x3D; table[0]; e !&#x3D; null; e &#x3D; e.next) &#123;</span><br><span class="line">            if (e.key &#x3D;&#x3D; null) &#123;</span><br><span class="line">                V oldValue &#x3D; e.value;</span><br><span class="line">                e.value &#x3D; value;</span><br><span class="line">                e.recordAccess(this);</span><br><span class="line">                return oldValue;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        modCount++;</span><br><span class="line">        addEntry(0, null, value, 0);</span><br><span class="line">        return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>（3）计算key的hash，根据hash计算数组下表</p>
+<p>hash(key)方法是根据key值计算并返回一个整型的数，在Java7中，如果key为String，主要以sun.misc.Hashing.stringHash32((String) k)的方式计算，否则对hashSeed和key的hashCode进行异或运算，再进行无符号右移、异或计算，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">final int hash(Object k) &#123;</span><br><span class="line">        int h &#x3D; hashSeed;</span><br><span class="line">        if (0 !&#x3D; h &amp;&amp; k instanceof String) &#123;</span><br><span class="line">            return sun.misc.Hashing.stringHash32((String) k);</span><br><span class="line">        &#125;</span><br><span class="line">        h ^&#x3D; k.hashCode();</span><br><span class="line">        h ^&#x3D; (h &gt;&gt;&gt; 20) ^ (h &gt;&gt;&gt; 12);</span><br><span class="line">        return h ^ (h &gt;&gt;&gt; 7) ^ (h &gt;&gt;&gt; 4);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在Java8中，直接(h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">static final int hash(Object key) &#123;</span><br><span class="line">        int h;</span><br><span class="line">        return (key &#x3D;&#x3D; null) ? 0 : (h &#x3D; key.hashCode()) ^ (h &gt;&gt;&gt; 16);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>计算出hash值后，需要根据hash值来计算数组的下标，如下代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">static int indexFor(int h, int length) &#123;</span><br><span class="line">        &#x2F;&#x2F; assert Integer.bitCount(length) &#x3D;&#x3D; 1 : &quot;length must be a non-zero power of 2&quot;;</span><br><span class="line">        return h &amp; (length-1);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>计算数组下标直接用hash值和数组长度-1进行与运算，因为计算出来的hash值是一个整型数据，范围在-2^31~2^31-1，大约有40多亿个数，怎么根据这40多亿中的一个数来决定数组的其中一个下标呢，为了便于理解来举个例子：</p>
+<p>比如我们向HashMap中存入了两个键值对entry1(key1=”abc”,value1=”ABC”)、entry2(key2=”def”,value1=”DEF”)，假设key1对应的hash值为18，二进制为10010，假设key2对应的hash值为27，二进制为11011。</p>
+<p><a href="https://ask.qcloudimg.com/http-save/yehe-1113089/084pakx6og.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img src="https://ask.qcloudimg.com/http-save/yehe-1113089/084pakx6og.jpeg?imageView2/2/w/1620" alt="img"></a></p>
+<p>其中会发现一个规律，如果数组长度为2的幂次方，那么数组长度-1的二进制每个位数的值都是1，与key的hash进行&amp;运算之后的结果，除了超过数组长度-1数值的高位部分，低位部分都与key的hash值一致。</p>
+<p>如果数组长度不是2的幂次方，比如15，结果会是什么样呢？如下图：</p>
+<p><a href="https://ask.qcloudimg.com/http-save/yehe-1113089/1ig0euvkul.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img src="https://ask.qcloudimg.com/http-save/yehe-1113089/1ig0euvkul.jpeg?imageView2/2/w/1620" alt="img"></a></p>
+<p>当数组长度是15的时候，其二进制末尾数值为0，计算结果的末尾肯定永远是0，所以永远不会有计算结果为00001、00011、00101、00111、01001、01011、01101、01111这几种末尾是1的情况，也就是数组下标为1、3、5、7、9、11、13、15这几个位置永远都不会存储数据，造成了严重的空间浪费，这就是HashMap中的数组长度必须是2的幂次方的原因。</p>
+<p>（4）存储元素</p>
+<p>找到数组下标之后，就要存储元素啦，有两种情况：1、put元素的key值已经存在；2、put元素的key值不存在。第一种情况会先遍历数组下标对应空间存储的链表，如果存在该key值的节点，就把对应新的value替换旧的value；第二种情况，需要调用addEntry(hash,key,value,数组下标)来新创建一个节点元素，创建节点元素之前，先进行扩容判断操作，如过需要扩容，就把数组空间扩大之后才创建新节点，addEntry()方法的源码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">void addEntry(int hash, K key, V value, int bucketIndex) &#123;</span><br><span class="line">        if ((size &gt;&#x3D; threshold) &amp;&amp; (null !&#x3D; table[bucketIndex])) &#123;</span><br><span class="line">            resize(2 * table.length);</span><br><span class="line">            hash &#x3D; (null !&#x3D; key) ? hash(key) : 0;</span><br><span class="line">            bucketIndex &#x3D; indexFor(hash, table.length);</span><br><span class="line">        &#125;</span><br><span class="line">        createEntry(hash, key, value, bucketIndex);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>size就是HashMap中目前存储元素的个数，threshold的值是扩容临界值（数组长度*加载因子），当size大于等于threshold并且数组当前位置存储内容不为空时，就调用resize方法进行扩容操作（java1.6之前只要size大于等于threshold就会扩容），扩大后的容量为数组长度的2倍。扩容的核心逻辑在resize方法调用的transfer方法中，主要就是把原来table中的元素复制到扩容后的newTable中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">void transfer(Entry[] newTable, boolean rehash) &#123;</span><br><span class="line">        int newCapacity &#x3D; newTable.length;</span><br><span class="line">        for (Entry&lt;K,V&gt; e : table) &#123;&#x2F;&#x2F;遍历数组</span><br><span class="line">            while(null !&#x3D; e) &#123;    &#x2F;&#x2F;遍历链表</span><br><span class="line">                Entry&lt;K,V&gt; next &#x3D; e.next;&#x2F;&#x2F;转移头结点之前先保存头结点的下一个结点</span><br><span class="line">                if (rehash) &#123;</span><br><span class="line">                    e.hash &#x3D; null &#x3D;&#x3D; e.key ? 0 : hash(e.key);</span><br><span class="line">                &#125;</span><br><span class="line">                int i &#x3D; indexFor(e.hash, newCapacity);</span><br><span class="line">                e.next &#x3D; newTable[i];</span><br><span class="line">                newTable[i] &#x3D; e;</span><br><span class="line">                e &#x3D; next;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>为了比较直观地理解transfer方法这段代码，画了几张图，假如HashMap中现在有entry1、entry2、entry3、entry4四个元素，且他们在table中的存储位置如下：</p>
+<p><a href="https://ask.qcloudimg.com/http-save/yehe-1113089/scsgfwhwwx.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img src="https://ask.qcloudimg.com/http-save/yehe-1113089/scsgfwhwwx.jpeg?imageView2/2/w/1620" alt="img"></a></p>
+<p>for循环遍历的是table数组中的每一个元素，while循环遍历的是每一条链表上的节点。当第一次执行完Entry next = e.next;后，e指向的是enty1，next指向的是entry2；当第一次执行完int i = indexFor(e.hash, newCapacity);后，i的值就是e（entry1）在新表中计算出来的下标（这里假设i=2）；当第一次执行完e.next = newTable[i];后，entry1的next就指向newTable[2]，也就是null（这一步是重点，会导致在同一条链中新节点总会插入到链表头）；当第一次执行完newTable[i] = e;后，entry1已经被转移到了新表数组下标是2的链表中，如下图：</p>
+<p><a href="https://ask.qcloudimg.com/http-save/yehe-1113089/sb6c3o02du.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img src="https://ask.qcloudimg.com/http-save/yehe-1113089/sb6c3o02du.jpeg?imageView2/2/w/1620" alt="img"></a></p>
+<p>第二次while循环后的结果是entry2节点被转移到新表下标是7的链表中，如下图：</p>
+<p><a href="https://ask.qcloudimg.com/http-save/yehe-1113089/c0ornk4ywa.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img src="https://ask.qcloudimg.com/http-save/yehe-1113089/c0ornk4ywa.jpeg?imageView2/2/w/1620" alt="img"></a></p>
+<p>第三次while循环时，执行完 Entry next = e.next; 后，e指向的是enty3，next指向的是null；当执行完int i = indexFor(e.hash, newCapacity);后，i的值就是e（entry3）在新表中计算出来的下标（这里假设i=2）；当执行完e.next = newTable[i];后，entry3的next就指向newTable[2]，也就是entry1（这一步是重点，会导致在同一条链中新节点总会插入到链表头）；当执行完newTable[i] = e;后，entry3已经插入到新表数组下标是2的链表头部，如下图；当执行完e = next;，e的值为null，结束本次while循环。</p>
+<p><a href="https://ask.qcloudimg.com/http-save/yehe-1113089/4kqtf8e1nb.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img src="https://ask.qcloudimg.com/http-save/yehe-1113089/4kqtf8e1nb.jpeg?imageView2/2/w/1620" alt="img"></a></p>
+<p>下图是第二次for循环执行后的结果，entry4插入到新表下标为2的链表头部：</p>
+<p><a href="https://ask.qcloudimg.com/http-save/yehe-1113089/vvnq7cd24s.jpeg?imageView2/2/w/1620" target="_blank" rel="noopener"><img src="https://ask.qcloudimg.com/http-save/yehe-1113089/vvnq7cd24s.jpeg?imageView2/2/w/1620" alt="img"></a></p>
+<h3 id="get方法"><a href="#get方法" class="headerlink" title="get方法"></a>get方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public V get(Object key) &#123;</span><br><span class="line">        Node&lt;K,V&gt; e;</span><br><span class="line">        return (e &#x3D; getNode(hash(key), key)) &#x3D;&#x3D; null ? null : e.value;　　　　　　&#x2F;&#x2F;根据key及其hash值查询node节点，如果存在，则返回该节点的value值。</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    final Node&lt;K,V&gt; getNode(int hash, Object key) &#123;　　　　　　　　　　　　　　　　  &#x2F;&#x2F;根据key搜索节点的方法。记住判断key相等的条件：hash值相同 并且 符合equals方法。</span><br><span class="line">        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; first, e; int n; K k;</span><br><span class="line">        if ((tab &#x3D; table) !&#x3D; null &amp;&amp; (n &#x3D; tab.length) &gt; 0 &amp;&amp;　　　　　　　　　&#x2F;&#x2F;根据输入的hash值，可以直接计算出对应的下标（n - 1）&amp; hash，缩小查询范围，如果存在结果，则必定在table的这个位置上。</span><br><span class="line">            (first &#x3D; tab[(n - 1) &amp; hash]) !&#x3D; null) &#123;</span><br><span class="line">            if (first.hash &#x3D;&#x3D; hash &amp;&amp; &#x2F;&#x2F; always check first node</span><br><span class="line">                ((k &#x3D; first.key) &#x3D;&#x3D; key || (key !&#x3D; null &amp;&amp; key.equals(k))))　　　 &#x2F;&#x2F;判断第一个存在的节点的key是否和查询的key相等。如果相等，直接返回该节点。</span><br><span class="line">                return first;</span><br><span class="line">            if ((e &#x3D; first.next) !&#x3D; null) &#123;　　　　　　　　　　　　　　　　　　　　　　 &#x2F;&#x2F;遍历该链表&#x2F;红黑树直到next为null。</span><br><span class="line">                if (first instanceof TreeNode)　　　　　　　&#x2F;&#x2F;当这个table节点上存储的是红黑树结构时，在根节点first上调用getTreeNode方法，在内部遍历红黑树节点，查看是否有匹配的TreeNode。</span><br><span class="line">                    return ((TreeNode&lt;K,V&gt;)first).getTreeNode(hash, key);</span><br><span class="line">                do &#123;</span><br><span class="line">                    if (e.hash &#x3D;&#x3D; hash &amp;&amp;　　　　　　　　　　　　　　　　　　　　　　　　&#x2F;&#x2F;当这个table节点上存储的是链表结构时，用跟第11行同样的方式去判断key是否相同。</span><br><span class="line">                        ((k &#x3D; e.key) &#x3D;&#x3D; key || (key !&#x3D; null &amp;&amp; key.equals(k))))</span><br><span class="line">                        return e;</span><br><span class="line">                &#125; while ((e &#x3D; e.next) !&#x3D; null);　　　　　　　　　　　　　　　　　　  　 &#x2F;&#x2F;如果key不同，一直遍历下去直到链表尽头，e.next &#x3D;&#x3D; null。</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>从 HashMap 中 中 get 元素时，首先计算 key 的 hashCode ，找到数组中对过 应位置的某一元素，然后通过 key 的 的 equals 方法在对应位置的链表中找到需要的元素。</strong></p>
+<p><strong>归纳起来简单地说，HashMap 在底层将 key-value 当成一个整体进行处理，这个整体就是一个 Entry 对象。HashMap 底层采用一个 Entry[] 数组来保存所有的 key-value 对，个 当需要存储一个 Entry 对象时，会根据 hash 算法来决定其在数组中的存储位置，在根据equals 方法决定其在该数组位置上的链表中的存储位置；当需要取出一个 Entry 时，也会根据 hash 算法找到其在数组中的存储位置，再根据 equals 方法从该位置上的链表中取出该 Entry。</strong></p>
+<h2 id="HashMap-的-的-resize"><a href="#HashMap-的-的-resize" class="headerlink" title="HashMap 的 的 resize"></a>HashMap 的 的 resize</h2><p>当 当 HashMap 中的元素越来越多的时候，hash 冲突的几率也就越来越高，因为数组的对长度是固定的。所以为了提高查询的效率，就要对 HashMap 的数组进行扩容，数组扩容在 这个操作也会出现在 ArrayList 中，这是一个常用的操作，而在 HashMap 数组扩容之后，最消耗性能的点就出现了：原数组中的数据必须重新计算其在新数组中的位置，并放进去，是 这就是 resize 。</p>
+<p>那么 HashMap 什么时候进行扩容呢？当 HashMap 中的元素个数超过数组大小loadFactor 时，就会进行数组扩容，loadFactor 的默认值为 0.75 ，这是一个折中的取值。为 也就是说，默认情况下，数组大小为 16 ，那么当 HashMap 中元素个数超过 160.75=12的时候，就把数组的大小扩展为 216=32 ，即扩大一倍，然后重新计算个元素在数组中知 的位置，而这是一个非常消耗性能的操作，所以如果我们已经预知 HashMap 中元素的个高 数，那么预设元素的个数能够有效的提高 HashMap 的性能。</p>
+<h2 id="HashMap-的性能参数"><a href="#HashMap-的性能参数" class="headerlink" title="HashMap 的性能参数"></a>HashMap 的性能参数</h2><p>HashMap 包含如下几个构造器：</p>
+<ol>
+<li>HashMap()：构建一个初始容量为 16，负载因子为 0.75 的 HashMap。</li>
+<li>HashMap(int initialCapacity)：构建一个初始容量为 initialCapacity，负载因子为 0.75 的 HashMap。</li>
+<li>HashMap(int initialCapacity, float loadFactor)：以指定初始容量、指定的负载因子创建一个 HashMap。</li>
+<li>HashMap 的基础构造器 HashMap(int initialCapacity, float loadFactor)带有两个参数，它们是初始容量 initialCapacity 和加载因子 loadFactor。</li>
+<li>initialCapacity：HashMap 的最大容量，即为底层数组的长度。</li>
+<li>loadFactor：负载因子 loadFactor 定义为：散列表的实际元素数目(n)/ 散列表的容量(m)。</li>
+<li>负载因子衡量的是一个散列表的空间的使用程度，负载因子越大表示散列表的装填程度越高，反之愈小。对于使用链表法的散列表来说，查找一个元素的平均时间是 O(1+a)，因此如果负载因子越大，对空间的利用更充分，然而后果是查找效率的降低；如果负载因子太小，那么散列表的数据将过于稀疏，对空间造成严重浪费。</li>
+</ol>
+<p>HashMap 的实现中，通过 threshold 字段来判断 HashMap 的最大容量：<br><code>threshold = (int)(capacity * loadFactor);</code></p>
+<p>结合负载因子的定义公式可知，threshold 就是在此 loadFactor 和 capacity 对应下允许的最大元素数目，超过这个数目就重新 resize，以降低实际的负载因子。默认的的负载因子0.75是对空间和时间效率的一个平衡选择。当容量超出此最大容量时， resize后的HashMap容量是容量的两倍：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (size++ &gt;&#x3D; threshold)</span><br><span class="line">resize(2 * table.length);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Fail-Fast-机制"><a href="#Fail-Fast-机制" class="headerlink" title="Fail-Fast 机制"></a>Fail-Fast 机制</h2><p><strong>我们知道 java.util.HashMap 不是线程安全的，因此如果在使用迭代器的过程中有其了 他线程修改了 map ，那么将抛出 ConcurrentModificationException ，这就是所谓 fail-fast策略。</strong></p>
+<p>这一策略在源码中的实现是通过 modCount 域，modCount 顾名思义就是修改次数，对HashMap 内容的修改都将增加这个值，那么在迭代器初始化过程中会将这个值赋给迭代器的 expectedModCount。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">HashIterator() &#123;</span><br><span class="line">	expectedModCount &#x3D; modCount;</span><br><span class="line">	if (size &gt; 0) &#123; &#x2F;&#x2F; advance to first entry</span><br><span class="line">	Entry[] t &#x3D; table;</span><br><span class="line">	while (index &lt; t.length &amp;&amp; (next &#x3D; t[index++]) &#x3D;&#x3D; null)</span><br><span class="line">		;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在迭代过程中，判断 modCount 跟 expectedModCount 是否相等，如果不相等就表示已经有其他线程修改了 Map：注意到 modCount 声明为 volatile，保证线程之间修改的可见性。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">final Entry&lt;K,V&gt; nextEntry() &#123;</span><br><span class="line"> 	if (modCount !&#x3D; expectedModCount)</span><br><span class="line">		 throw new ConcurrentModificationException();</span><br><span class="line">		 &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>在 HashMap 的 API 中指出：</strong></p>
+<ol>
+<li>由所有 HashMap 类的“collection 视图方法”所返回的迭代器都是快速失败的：在迭代器创建之后，如果从结构上对映射进行修改，除非通过迭代器本身的 remove 方法，其他任何时间任何方式的修改，迭代器都将抛出 ConcurrentModificationException。因此，面对并发的修改，迭代器很快就会完全失败，而不冒在将来不确定的时间发生任意不确定行为的风险。</li>
+<li>注意，迭代器的快速失败行为不能得到保证，一般来说，存在非同步的并发修改时，不可能作出任何坚决的保证。快速失败迭代器尽最大努力抛出 ConcurrentModificationException。因此，编写依赖于此异常的程序的做法是错误的，正确做法是：迭代器的快速失败行为应该仅用于检测程序错误。</li>
+</ol>
+<p><strong>部分转载于<a href="https://cloud.tencent.com/developer/user/1113089" target="_blank" rel="noopener">DannyHoo</a></strong></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"># 源码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/07/19/%E4%BA%BA%E5%91%90/" rel="prev" title="人呐">
+      <i class="fa fa-chevron-left"></i> 人呐
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/07/24/idea%E5%BF%AB%E6%8D%B7%E9%94%AE/" rel="next" title="idea快捷键">
+      idea快捷键 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MDczMC8yNzIxMg=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap-概述"><span class="nav-number">1.</span> <span class="nav-text">HashMap 概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap-的数据结构"><span class="nav-number">2.</span> <span class="nav-text">HashMap 的数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap-的存取实现"><span class="nav-number">3.</span> <span class="nav-text">HashMap 的存取实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#put方法"><span class="nav-number">3.1.</span> <span class="nav-text">put方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#get方法"><span class="nav-number">3.2.</span> <span class="nav-text">get方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap-的-的-resize"><span class="nav-number">4.</span> <span class="nav-text">HashMap 的 的 resize</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap-的性能参数"><span class="nav-number">5.</span> <span class="nav-text">HashMap 的性能参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fail-Fast-机制"><span class="nav-number">6.</span> <span class="nav-text">Fail-Fast 机制</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="J.Nemo"
+      src="https://drscdn.500px.org/photo/295255277/q%3D80_h%3D450/v2?user_id=39303725&webp=true&sig=c7760b111c6b95f1efb246c5ad9ebdbf09342ecc18dda4a9f928b968f699e2a1">
+  <p class="site-author-name" itemprop="name">J.Nemo</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/MUXIAONING" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;MUXIAONING" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/6421106372" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;6421106372" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:muxiaoningdewei@gmail.com" title="E-Mail → mailto:muxiaoningdewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://music.163.com/#/user/home?id=446917614" title="网易云 → https:&#x2F;&#x2F;music.163.com&#x2F;#&#x2F;user&#x2F;home?id&#x3D;446917614" rel="noopener" target="_blank"><i class="fa fa-headphones fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+      <link href="https://cdn.jsdelivr.net/npm/aplayer@1.10.0/dist/APlayer.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.0/dist/APlayer.min.js">
+    </script>
+    <div class="aplayer" data-fixed="true" data-id="989500891" data-listfolded="true" data-lrctype="0" data-server="netease" data-type="playlist" id="aplayer">
+    </div>
+    <script src="https://unpkg.com/meting@1.2/dist/Meting.min.js">
+    </script>
+</link>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">J.Nemo</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">274k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:09</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
