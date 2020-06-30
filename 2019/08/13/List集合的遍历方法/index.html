@@ -31,7 +31,7 @@
 <meta property="og:description" content="List遍历的方法分为三种类型 1.for循环遍历 2.迭代器遍历 3.foreach循环遍历">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-08-12T17:29:00.000Z">
-<meta property="article:modified_time" content="2020-06-30T00:18:51.869Z">
+<meta property="article:modified_time" content="2020-06-30T14:29:39.383Z">
 <meta property="article:author" content="J.Nemo">
 <meta property="article:tag" content="Hexo">
 <meta property="article:tag" content="加密">
@@ -226,7 +226,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-06-30 08:18:51" itemprop="dateModified" datetime="2020-06-30T08:18:51+08:00">2020-06-30</time>
+                <time title="修改时间：2020-06-30 22:29:39" itemprop="dateModified" datetime="2020-06-30T22:29:39+08:00">2020-06-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -251,7 +251,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.2k</span>
+              <span>696</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -276,7 +276,7 @@
 </blockquote>
 <a id="more"></a>
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">public class TestList &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        List&lt;String&gt; list &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">        list.add(&quot;布朗克斯&quot;);</span><br><span class="line">        list.add(&quot;布鲁克林&quot;);</span><br><span class="line">        list.add(&quot;曼哈顿&quot;);</span><br><span class="line">        list.add(&quot;皇后区&quot;);</span><br><span class="line">        list.add(&quot;斯塔滕岛&quot;);</span><br><span class="line">        &#x2F;&#x2F;方法一</span><br><span class="line">        for (int i &#x3D; 0; i &lt; list.size(); i++) &#123;</span><br><span class="line">            System.out.println(list.get(i));</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(&quot;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&quot;);</span><br><span class="line">        &#x2F;&#x2F;方法二</span><br><span class="line">        Iterator iterator &#x3D; list.iterator();</span><br><span class="line">        while (iterator.hasNext())&#123;</span><br><span class="line">            String data &#x3D; iterator.next().toString();</span><br><span class="line">            System.out.println(data);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(&quot;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&quot;);</span><br><span class="line">        &#x2F;&#x2F;方法三</span><br><span class="line">        for (String data:list) &#123;</span><br><span class="line">            System.out.println(data);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestList</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"布朗克斯"</span>);</span><br><span class="line">        list.add(<span class="string">"布鲁克林"</span>);</span><br><span class="line">        list.add(<span class="string">"曼哈顿"</span>);</span><br><span class="line">        list.add(<span class="string">"皇后区"</span>);</span><br><span class="line">        list.add(<span class="string">"斯塔滕岛"</span>);</span><br><span class="line">        <span class="comment">//方法一</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; list.size(); i++) &#123;</span><br><span class="line">            System.out.println(list.get(i));</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"======================================"</span>);</span><br><span class="line">        <span class="comment">//方法二</span></span><br><span class="line">        Iterator iterator = list.iterator();</span><br><span class="line">        <span class="keyword">while</span> (iterator.hasNext())&#123;</span><br><span class="line">            String data = iterator.next().toString();</span><br><span class="line">            System.out.println(data);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"======================================"</span>);</span><br><span class="line">        <span class="comment">//方法三</span></span><br><span class="line">        <span class="keyword">for</span> (String data:list) &#123;</span><br><span class="line">            System.out.println(data);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -461,12 +461,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">274k</span>
+    <span title="站点总字数">249k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:09</span>
+    <span title="站点阅读时长">3:47</span>
 </div>
 
         
